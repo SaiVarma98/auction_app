@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="flex flex-col items-center justify-center min-h-screen bg-[url('/static/images/stadium_night.jpg')] bg-cover bg-center relative">
+
+    <div class="absolute inset-0 bg-black/70"></div>
+
+    <div class="relative max-w-4xl w-full p-4 z-10 space-y-6">
+
+        <h1 class="text-5xl font-bold text-center gold-text">Admin Panel</h1>
+
+        <!-- Users Management -->
+        <div class="glass-card p-6 rounded-2xl neon-border shadow-2xl w-full">
+            <h2 class="text-3xl font-semibold purple-text mb-4 text-center">Manage Users</h2>
+            <form method="POST" action="/add_user" class="flex flex-col gap-2">
+                <input type="text" name="username" placeholder="Username" class="input input-bordered w-full">
+                <input type="password" name="password" placeholder="Password" class="input input-bordered w-full">
+                <select name="role" class="select select-bordered w-full">
+                    <option value="bidder">Bidder</option>
+                    <option value="auctioneer">Auctioneer</option>
+                    <option value="admin">Admin</option>
+                </select>
+                <button class="btn btn-neon mt-2 w-full">Add User</button>
+            </form>
+        </div>
+
+        <!-- Teams Management -->
+        <div class="glass-card p-6 rounded-2xl neon-border shadow-2xl w-full">
+            <h2 class="text-3xl font-semibold purple-text mb-4 text-center">Manage Teams</h2>
+            <form method="POST" action="/add_team" class="flex flex-col gap-2">
+                <input type="text" name="team_name" placeholder="Team Name" class="input input-bordered w-full">
+                <input type="number" name="purse" placeholder="Team Purse" class="input input-bordered w-full">
+                <button class="btn btn-neon mt-2 w-full">Add Team</button>
+            </form>
+        </div>
+
+        <!-- Players Management -->
+        <div class="glass-card p-6 rounded-2xl neon-border shadow-2xl w-full">
+            <h2 class="text-3xl font-semibold purple-text mb-4 text-center">Manage Players</h2>
+            <form method="POST" action="/add_player" class="flex flex-col gap-2" enctype="multipart/form-data">
+                <input type="text" name="name" placeholder="Player Name" class="input input-bordered w-full">
+                <input type="text" name="role" placeholder="Player Role" class="input input-bordered w-full">
+                <input type="number" name="base_price" placeholder="Base Price" class="input input-bordered w-full">
+                <input type="file" name="image" class="file-input file-input-bordered w-full">
+                <button class="btn btn-neon mt-2 w-full">Add Player</button>
+            </form>
+        </div>
+
+        <a href="/logout" class="mt-4 block text-red-400 hover:text-red-500 text-center">Logout</a>
+    </div>
+</div>
+
+{% endblock %}

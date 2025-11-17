@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mana Ooru Premier Leauge  - 2026</title>
+    <!-- Tailwind + DaisyUI CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@3.7.0/dist/full.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="bg-[#1A1A2E] text-white font-inter">
+
+    <nav class="bg-[#2B2B50] p-4 flex justify-between items-center shadow-lg neon-glow">
+        <div class="text-2xl font-bold text-purple-300">Mana Ooru Premier Leauge  - 2026</div>
+        {% if session.get('username') %}
+        <div>
+            <span class="mr-4">Hi, {{ session.get('username') }}</span>
+            <a href="{{ url_for('logout') }}" class="btn btn-sm bg-purple-600 hover:bg-purple-700">Logout</a>
+        </div>
+        {% endif %}
+    </nav>
+
+    <main class="min-h-[85vh] p-4">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-[#2B2B50] p-4 text-center text-purple-300 shadow-inner">
+        &copy; 2026 Mana Ooru Premier Leauge - Rajula Tallavalasa
+    </footer>
+
+</body>
+</html>

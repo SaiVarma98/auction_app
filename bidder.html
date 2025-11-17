@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="flex flex-col items-center gap-6">
+
+    <h2 class="text-3xl gold-text font-bold">Team: {{ session.get('team_name') }}</h2>
+
+    <div class="glass-card p-6 rounded-2xl neon-border shadow-xl w-full md:w-1/2 text-center">
+        <div id="current-player" class="mb-4">
+            <p class="text-purple-300">Auction not started</p>
+        </div>
+
+        <div class="flex justify-center gap-2">
+            <input type="number" id="bid-amount" placeholder="Enter bid" class="input input-bordered w-32">
+            <button id="bid-btn" class="btn bg-purple-600 hover:bg-purple-700">Place Bid</button>
+        </div>
+        <p id="bid-msg" class="text-red-500 mt-2"></p>
+    </div>
+
+    <div class="glass-card p-4 rounded-xl neon-border shadow-lg w-full md:w-1/2">
+        <h3 class="text-xl gold-text mb-2">Teams & Purses</h3>
+        <div id="teams-list"></div>
+    </div>
+
+</div>
+
+<script>
+const teamName = "{{ session.get('team_name') }}";
+
+async function updateBidderState(){
+    const res = await fetch("/live_state");
+    const data = await res.json();
+
+    const cp = data.current_player;
+    const currentDiv = document.getElementById("current-player");
+    if(cp){
+        currentDiv.innerHTML = `
+            <img src="/static/images/${cp.image}" class="mx-auto rounded-lg w-2/3 mb-2 neon-border">
+            <p class="text-lg gold-text font-bold">${cp.name} (${cp.role})</p>
+            <p class="text-purple-300">Base Price: ${cp.base_price}</p>
+            <p class="text-purple-300">Highest Bid: ${data.state.highest_bid || cp.base_price}</p>
+            <p class="text-purple-300">Highest Bidder: ${data.state.highest_bidder || '-'}</p>
+        `;
+    } else {
+        currentDiv.innerHTML = '<p class="text-purple-300">Auction not started</p>';
+    }
+
+    const teamsDiv = document.getElementById("teams-list");
+    teamsDiv.innerHTML = '';
+    (data.teams || []).forEach(t=>{
+        teamsDiv.innerHTML += `<p class="text-purple-300">${t.team_name}: ₹${t.purse}</p>`;
+    });
+}
+
+document.getElementById("bid-btn").addEventListener("click", async ()=>{
+    const amt = document.getElementById("bid-amount").value;
+    const res = await fetch("/place_bid",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({team:teamName, amount: amt})
+    });
+    const data = await res.json();
+    const msg = document.getElementById("bid-msg");
+    if(data.status==="success"){
+        msg.textContent = "Bid placed successfully!";
+        msg.classList.remove("text-red-500");
+        msg.classList.add("text-green-400");
+    } else {
+        msg.textContent = data.message;
+        msg.classList.remove("text-green-400");
+        msg.classList.add("text-red-500");
+    }
+    updateBidderState();
+});
+
+setInterval(updateBidderState,1000);
+updateBidderState();
+</script>
+
+{% endblock %}

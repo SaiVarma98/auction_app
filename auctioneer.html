@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="flex flex-col md:flex-row gap-6 p-6">
+
+    <!-- Left: Current Player & Actions -->
+    <div class="glass-card p-6 rounded-2xl neon-border shadow-2xl w-full md:w-2/3 text-center">
+        <div id="current-player" class="mb-4">
+            <p class="text-purple-300">Auction not started</p>
+        </div>
+
+        <div class="flex flex-wrap justify-center gap-3 mt-4">
+            <button id="start-auction" class="btn bg-purple-600 hover:bg-purple-700">Start Auction</button>
+            <button id="next-player" class="btn bg-purple-600 hover:bg-purple-700">Next Player</button>
+            <button id="pass-player" class="btn bg-purple-600 hover:bg-purple-700">Pass Player</button>
+            <button id="finalize-sale" class="btn bg-purple-600 hover:bg-purple-700">Finalize Sale</button>
+            <button id="start-round2" class="btn bg-purple-600 hover:bg-purple-700">Start Round 2</button>
+            <button id="reset-auction" class="btn bg-red-600 hover:bg-red-700">Reset Auction</button>
+        </div>
+    </div>
+
+    <!-- Right: Teams & Sold Players -->
+    <div class="flex flex-col gap-4 w-full md:w-1/3">
+
+        <div class="glass-card p-4 rounded-xl neon-border shadow-lg">
+            <h3 class="text-xl gold-text mb-2">Teams & Purses</h3>
+            <div id="teams-list"></div>
+        </div>
+
+        <div class="glass-card p-4 rounded-xl neon-border shadow-lg">
+            <h3 class="text-xl gold-text mb-2">Sold Players</h3>
+            <div id="sold-players"></div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+async function updateAuctioneerState(){
+    const res = await fetch("/live_state");
+    const data = await res.json();
+
+    // Current Player
+    const cpDiv = document.getElementById("current-player");
+    const cp = data.current_player;
+    if(cp){
+        cpDiv.innerHTML = `
+            <img src="/static/images/${cp.image}" class="mx-auto rounded-lg w-3/4 mb-2 neon-border shadow-xl">
+            <p class="text-lg gold-text font-bold">${cp.name} (${cp.role})</p>
+            <p class="text-purple-300">Base Price: ₹${cp.base_price}</p>
+            <p class="text-purple-300">Highest Bid: ₹${data.state.highest_bid || cp.base_price}</p>
+            <p class="text-purple-300">Highest Bidder: ${data.state.highest_bidder || '-'}</p>
+        `;
+    } else {
+        cpDiv.innerHTML = '<p class="text-purple-300">Auction not started</p>';
+    }
+
+    // Teams & Purses
+    const teamsDiv = document.getElementById("teams-list");
+    teamsDiv.innerHTML = '';
+    (data.teams || []).forEach(t=>{
+        teamsDiv.innerHTML += `<p class="text-purple-300">${t.team_name}: ₹${t.purse}</p>`;
+    });
+
+    // Sold Players
+    const soldDiv = document.getElementById("sold-players");
+    soldDiv.innerHTML = '';
+    (data.players || []).filter(p=>p.sold).forEach(p=>{
+        soldDiv.innerHTML += `<p class="text-purple-300">${p.name} (${p.sold_to}) - ₹${p.final_price}</p>`;
+    });
+}
+
+// Auction Actions
+document.getElementById("start-auction").addEventListener("click", ()=>fetch("/start_auction").then(updateAuctioneerState));
+document.getElementById("next-player").addEventListener("click", ()=>fetch("/next_player").then(updateAuctioneerState));
+document.getElementById("pass-player").addEventListener("click", ()=>fetch("/pass_player").then(updateAuctioneerState));
+document.getElementById("finalize-sale").addEventListener("click", ()=>fetch("/finalize_sale").then(updateAuctioneerState));
+document.getElementById("start-round2").addEventListener("click", ()=>fetch("/start_round2").then(updateAuctioneerState));
+document.getElementById("reset-auction").addEventListener("click", ()=>fetch("/reset_auction").then(updateAuctioneerState));
+
+// Auto refresh every 1 sec
+setInterval(updateAuctioneerState,1000);
+updateAuctioneerState();
+</script>
+
+{% endblock %}
